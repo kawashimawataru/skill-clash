@@ -1,0 +1,21 @@
+{
+  "name": "skill-clash",
+  "owner": {
+    "name": "Wataru Kawashima"
+  },
+  "metadata": {
+    "description": "Find the fights between your Claude Code skills before you load them together",
+    "version": "0.1.0"
+  },
+  "plugins": [
+    {
+      "name": "skill-clash",
+      "description": "Finds instruction conflicts and word-budget overruns between skills, narrows a task to one builder and one checker, writes LOADOUT.md, and suggests where every installed skill belongs.",
+      "source": "./",
+      "strict": false,
+      "skills": [
+        "./skills/skill-clash"
+      ]
+    }
+  ]
+}

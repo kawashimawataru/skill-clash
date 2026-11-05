@@ -1,0 +1,310 @@
+{
+ "_help": "Each axis has 'include' (regex terms, Python re, case-insensitive; use (?-i:...) for case-sensitive parts) and 'exclude' (patterns blanked out before matching, so write them to cover the include term). 'positive' / 'negative' are the polarity cue regexes. Negative cues are matched first and their span is masked, so 'don't use' never counts as 'use'.",
+ "axes": {
+  "gradient": {
+   "include": [
+    "\\bgradients?\\b",
+    "グラデーション"
+   ],
+   "exclude": [
+    "gradient'?s? interpolation",
+    "interpolat\\w*.{0,40}gradients?",
+    "ramp is not a gradient",
+    "rainbow-gradient",
+    "two-hue gradients?",
+    "gradients? (goes|go|turns?) (gray|grey|muddy)",
+    "linear-gradient\\(",
+    "radial-gradient\\(",
+    "\\bfor gradients\\b"
+   ]
+  },
+  "serif": {
+   "include": [
+    "\\bserifs?\\b",
+    "明朝"
+   ],
+   "exclude": [
+    "sans[- ]serifs?",
+    "editorial-serif"
+   ]
+  },
+  "card grid / bento": {
+   "include": [
+    "\\bbento\\b",
+    "card grids?",
+    "grid of cards",
+    "identical (rounded )?cards",
+    "saas-card",
+    "ベントー",
+    "カードグリッド"
+   ]
+  },
+  "dark theme": {
+   "include": [
+    "dark (theme|background|ground|ui|palette)s?\\b",
+    "dark[- ]first",
+    "dark mode (by default|only|first)",
+    "defaults? to dark",
+    "ダークテーマ"
+   ],
+   "exclude": [
+    "light[/ ](and |or )?dark (theme|background|ground)s?",
+    "(in|for|on) (the )?dark (theme|mode|backgrounds?|grounds?)\\b",
+    "dark (backgrounds?|grounds?) should be (warm|cool)",
+    "\\([^)]{0,40}dark theme only\\)"
+   ]
+  },
+  "emoji": {
+   "include": [
+    "\\bemojis?\\b",
+    "絵文字"
+   ]
+  },
+  "border radius / rounded": {
+   "include": [
+    "border-radius",
+    "border radius",
+    "\\brounded\\b",
+    "角丸"
+   ],
+   "exclude": [
+    "zero border-radius",
+    "border-radius: ?0\\b",
+    "no border-radius",
+    "`rounded[`.]",
+    "\\brounded\\.[a-z]",
+    "\\brounded:",
+    "\\brounded (and spacing|values?|tokens?)\\b"
+   ]
+  },
+  "glassmorphism": {
+   "include": [
+    "glassmorphism",
+    "frosted glass",
+    "backdrop-blur",
+    "すりガラス"
+   ],
+   "exclude": [
+    "effects like glass/glassmorphism"
+   ]
+  },
+  "centered hero": {
+   "include": [
+    "cent(e|r)red hero",
+    "hero.{0,20}cent(er|re)d",
+    "中央寄せのヒーロー"
+   ]
+  },
+  "letter-spacing / tracking": {
+   "include": [
+    "letter-spacing",
+    "\\btracking\\b",
+    "tracked-out",
+    "字間"
+   ],
+   "exclude": [
+    "(face|motion|mouse|object|eye|camera|time|progress|issue|error|event|analytics|downstream|position) tracking",
+    "tracking (mouse|data|pixel|code|events?|ids?|plan|depends)",
+    "letter-spacing reflow"
+   ]
+  },
+  "system-ui": {
+   "include": [
+    "system-ui",
+    "system fonts?",
+    "システムフォント"
+   ],
+   "exclude": [
+    "system fonts? cop\\w*"
+   ]
+  },
+  "Inter / Space Grotesk": {
+   "include": [
+    "(?-i:\\bInter\\b)(?!-)",
+    "space grotesk"
+   ]
+  },
+  "purple / violet": {
+   "include": [
+    "\\bpurple\\b",
+    "\\bviolet\\b",
+    "紫"
+   ]
+  },
+  "cream / beige background": {
+   "include": [
+    "\\bcreams?\\b",
+    "\\bbeige\\b",
+    "#FDFBF7",
+    "#F4F1EA",
+    "\\boff-white\\b",
+    "クリーム",
+    "ベージュ"
+   ],
+   "exclude": [
+    "cream ?\\+ ?`?screen",
+    "\\*\\*cream\\*\\*",
+    "cinematic-cream",
+    "cream ?↔|↔ ?cream"
+   ]
+  },
+  "drop shadow": {
+   "include": [
+    "drop[- ]shadows?",
+    "box-shadow",
+    "soft (grey |gray )?shadows?",
+    "ドロップシャドウ"
+   ]
+  },
+  "scroll reveal": {
+   "include": [
+    "scroll[- ]reveals?",
+    "animat\\w* on scroll",
+    "on-scroll animation",
+    "fade[- ](in|and)[- ]?(slide[- ])?up",
+    "スクロール.{0,6}(出現|アニメ)"
+   ]
+  },
+  "hover tilt": {
+   "include": [
+    "hover tilt",
+    "tilt on hover",
+    "3d tilt",
+    "\\btilt\\b"
+   ]
+  }
+ },
+ "negative": [
+  "\\bnever\\b",
+  "\\bnot\\b",
+  "\\bdiscourag\\w*",
+  "\\bavoid\\w*",
+  "\\bno\\b",
+  "\\bdon'?t\\b",
+  "\\bdo not\\b",
+  "\\bmust not\\b",
+  "\\bforbid\\w*",
+  "\\bban(s|ned)?\\b",
+  "\\breject\\w*",
+  "\\binstead of\\b",
+  "anti-patterns?",
+  "\\bai-generated\\b",
+  "\\bgeneric\\b",
+  "\\bslop\\b",
+  "\\bclich\\w*",
+  "\\btemplated\\b",
+  "禁止",
+  "避け",
+  "使わない",
+  "しない",
+  "ありがち",
+  "AIっぽ",
+  "\\bugly\\b",
+  "\\bcheap\\w*",
+  "\\btacky\\b",
+  "既定の型",
+  "寄っていない"
+ ],
+ "positive": [
+  "\\bprefer\\w*",
+  "\\buse[sd]?\\b",
+  "\\busing\\b",
+  "\\butili[sz]e\\w*",
+  "\\balways\\b",
+  "\\brecommend\\w*",
+  "\\bdefault to\\b",
+  "\\bmust\\b",
+  "\\bshould\\b",
+  "\\benforce\\w*",
+  "\\bpick\\b",
+  "\\bselect\\b",
+  "\\bchoose\\b",
+  "勧め",
+  "使う",
+  "使い",
+  "推奨",
+  "選ぶ",
+  "\\btry\\b",
+  "\\bconsider\\b",
+  "\\breach for\\b"
+ ],
+ "_help_ja_en": "Japanese request word (regex, case-insensitive) -> English words most descriptions use. Used by plan in Python and by the HTML page. shortcut: a small hand list; grow it when a common request finds nothing.",
+ "ja_en": [
+  [
+   "LP|ランディング",
+   "landing page website"
+  ],
+  [
+   "サイト|ホームページ|ウェブ|Web",
+   "website site"
+  ],
+  [
+   "高級|上質|リッチ",
+   "premium luxury high-end expensive"
+  ],
+  [
+   "設定",
+   "settings"
+  ],
+  [
+   "管理画面|ダッシュボード",
+   "dashboard admin"
+  ],
+  [
+   "スライド|発表|プレゼン|資料",
+   "slides presentation deck"
+  ],
+  [
+   "動画|ビデオ",
+   "video"
+  ],
+  [
+   "字幕",
+   "captions subtitles"
+  ],
+  [
+   "図",
+   "diagram"
+  ],
+  [
+   "アプリ",
+   "app"
+  ],
+  [
+   "画面|UI",
+   "interface screen"
+  ],
+  [
+   "点検|レビュー",
+   "review critique"
+  ],
+  [
+   "ロゴ|ブランド",
+   "logo brand"
+  ],
+  [
+   "動き|アニメ",
+   "animation motion"
+  ],
+  [
+   "色|配色",
+   "color palette"
+  ],
+  [
+   "フォント|書体|文字組",
+   "typography font"
+  ],
+  [
+   "フォーム|入力",
+   "form"
+  ],
+  [
+   "アイコン",
+   "icon"
+  ],
+  [
+   "カフェ|店",
+   "shop cafe"
+  ]
+ ]
+}

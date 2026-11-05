@@ -1,0 +1,556 @@
+<!doctype html>
+<html lang="ja">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>skill-clash</title>
+<style>
+/* 和文組版の基準: design-director/ja-typography.css（2026-11-05）をそのまま写した */
+:root {
+  font-family: "Local Noto Sans JP", "Noto Sans JP", "Hiragino Sans", "Hiragino Kaku Gothic ProN", sans-serif;
+  font-size: 16px; line-height: 1.75; letter-spacing: 0.02em; font-kerning: none;
+  line-break: strict; overflow-wrap: anywhere; text-spacing-trim: trim-start; text-autospace: normal;
+}
+@font-face { font-family: "Local Noto Sans JP"; src: local("Noto Sans JP"), local("Noto Sans CJK JP Regular"); }
+p, li { max-width: 40em; }
+h1, h2, h3, .heading { line-height: 1.3; letter-spacing: 0; font-feature-settings: "palt"; font-kerning: normal; }
+@supports (word-break: auto-phrase) { h1, h2, h3, .heading, figcaption { word-break: auto-phrase; text-wrap: balance; } }
+pre, code, time, input, textarea { text-autospace: no-autospace; }
+pre { text-spacing-trim: space-all; }
+
+/* この画面の値: 白地・墨・濃紺1色。角は丸めない。区切りは罫線 */
+:root {
+  --paper: #fff; --ink: #14161a; --navy: #16264a; --wash: #eef0f5; --rule: #d5d8de;
+  --muted: #545965; --mono: ui-monospace, "SF Mono", Menlo, monospace;
+  --col: 760px; --gut: 40px;
+}
+* { box-sizing: border-box; }
+html { scroll-padding-top: 72px; }
+body { margin: 0; background: var(--paper); color: var(--ink); -webkit-font-smoothing: antialiased; }
+button, input, select, textarea { font: inherit; color: inherit; border-radius: 0; }
+.num { font-variant-numeric: tabular-nums; }
+:focus-visible { outline: 2px solid var(--navy); outline-offset: 2px; }
+.sr { position: absolute; width: 1px; height: 1px; overflow: hidden; clip: rect(0 0 0 0); }
+.wrap { max-width: calc(var(--col) + 2 * var(--gut)); margin: 0 auto; padding: 0 var(--gut); }
+.muted { color: var(--muted); }
+.small { font-size: 14px; }
+code { font-family: var(--mono); font-size: 14px; background: var(--wash); padding: 1px 4px; }
+
+/* ① 入る */
+.intro { padding: 56px 0 32px; }
+.brand { font-size: 14px; font-weight: 700; letter-spacing: 0.08em; color: var(--navy); margin: 0 0 12px; }
+.intro h1 { font-size: 36px; margin: 0 0 16px; font-weight: 700; letter-spacing: -0.01em; }
+.intro p { margin: 0 0 8px; font-size: 17px; }
+.intro .example { margin-top: 20px; padding: 12px 16px; border-left: 3px solid var(--navy); background: var(--wash); font-size: 16px; max-width: none; }
+
+/* 段階の帯 */
+.steps { position: sticky; top: 0; z-index: 5; background: var(--paper); border-bottom: 1px solid var(--rule); }
+.steps ol { list-style: none; margin: 0 auto; padding: 0 var(--gut); max-width: calc(var(--col) + 2 * var(--gut)); display: flex; }
+.steps li { flex: 1; max-width: none; }
+.steps button { width: 100%; height: 52px; border: 0; border-bottom: 3px solid transparent; background: none; text-align: left; padding: 0 8px; cursor: pointer; font-size: 15px; color: var(--muted); white-space: nowrap; }
+.steps button:hover { color: var(--ink); }
+.steps .done button { color: var(--ink); }
+.steps [aria-current="step"] button { color: var(--navy); font-weight: 700; border-bottom-color: var(--navy); }
+.steps b { font-variant-numeric: tabular-nums; margin-right: 6px; }
+
+/* 各段階 */
+.step { padding: 48px 0 48px 28px; border-left: 4px solid var(--rule); margin: 40px 0; position: relative; }
+.step.now { border-left-color: var(--navy); }
+.now-tag { position: absolute; top: -12px; left: 24px; background: var(--navy); color: #fff; font-size: 14px; font-weight: 700; padding: 2px 10px; }
+.step h2 { font-size: 26px; margin: 0 0 12px; font-weight: 700; }
+.step h2 .n { color: var(--navy); margin-right: 8px; }
+.step h3 { font-size: 18px; margin: 32px 0 8px; }
+.step p { margin: 0 0 8px; }
+.sample { display: inline-block; font-size: 14px; font-weight: 700; color: var(--navy); border: 1.5px solid var(--navy); padding: 0 8px; margin-bottom: 12px; }
+
+.ask { display: flex; gap: 8px; margin: 16px 0 12px; }
+.ask input { flex: 1; min-width: 0; height: 52px; padding: 0 14px; font-size: 18px; border: 1.5px solid var(--ink); background: #fff; }
+.ask input::placeholder { color: #767b86; }
+.btn { height: 52px; padding: 0 22px; background: var(--navy); color: #fff; border: 0; font-weight: 700; cursor: pointer; white-space: nowrap; }
+.btn:hover { background: #0d1a36; }
+.btn:active { transform: scale(0.98); }
+.btn.sub { background: #fff; color: var(--navy); border: 1.5px solid var(--navy); }
+.btn.sub:hover { background: var(--wash); }
+.btn.sm { height: 40px; padding: 0 14px; font-size: 14px; }
+.chips { display: flex; flex-wrap: wrap; gap: 8px; align-items: center; font-size: 14px; }
+.chips button { height: 36px; padding: 0 12px; border: 1px solid var(--rule); background: #fff; cursor: pointer; font-size: 14px; }
+.chips button:hover { border-color: var(--navy); color: var(--navy); }
+
+/* ③ 提案 */
+.role { display: grid; grid-template-columns: 72px minmax(0, 1fr) auto; gap: 4px 16px; padding: 18px 0; border-top: 1px solid var(--rule); align-items: baseline; }
+.role:last-of-type { border-bottom: 1px solid var(--rule); }
+.role .lbl { font-weight: 700; color: var(--navy); }
+.role .nm { font-size: 20px; font-weight: 700; }
+.role .wd { font-size: 16px; text-align: right; white-space: nowrap; }
+.role .why { grid-column: 2 / 4; color: var(--muted); font-size: 15px; max-width: none; }
+.why q { quotes: "「" "」"; color: var(--ink); font-weight: 600; }
+.total { margin: 20px 0 0; padding: 14px 16px; background: var(--wash); max-width: none; }
+.total strong { color: var(--navy); }
+.others { margin: 8px 0 0; padding: 0; list-style: none; }
+.others li { display: grid; grid-template-columns: minmax(0, 1fr) auto auto; gap: 4px 16px; align-items: center; padding: 10px 0; border-bottom: 1px solid var(--rule); max-width: none; }
+.others .nm { font-weight: 600; }
+.others .why { grid-column: 1 / -1; font-size: 14px; color: var(--muted); }
+.others .acts { display: flex; gap: 6px; }
+
+/* ④ 決める */
+.axis { border: 0; border-top: 1px solid var(--rule); margin: 0; padding: 20px 0; min-width: 0; }
+.axis:last-of-type { border-bottom: 1px solid var(--rule); }
+.axis legend { font-size: 18px; font-weight: 700; padding: 0; margin-bottom: 8px; float: left; width: 100%; }
+.axis legend + * { clear: both; }
+.axis legend .en { font-weight: 400; color: var(--muted); font-size: 14px; margin-left: 8px; }
+.opt { display: grid; grid-template-columns: 24px minmax(0, 1fr); gap: 2px 8px; padding: 10px 12px; cursor: pointer; border: 1px solid transparent; }
+.opt:hover { background: #f7f8fa; }
+.opt:has(input:checked) { border-color: var(--navy); background: var(--wash); }
+.opt input { margin: 4px 0 0; width: 18px; height: 18px; accent-color: var(--navy); }
+.opt .say { font-weight: 700; }
+.opt .ev { grid-column: 2; font-size: 14px; color: var(--muted); }
+.opt .ev b { color: var(--ink); font-weight: 600; }
+.rd { font-size: 14px; font-weight: 700; color: #fff; background: var(--navy); padding: 0 6px; margin-left: 6px; }
+
+/* ⑤ 持ち帰る */
+textarea { display: block; width: 100%; min-height: 220px; margin: 16px 0 12px; padding: 14px; border: 1px solid var(--rule);
+  background: #f7f8fa; font-family: var(--mono); font-size: 14px; line-height: 1.65; resize: vertical; }
+.row-btns { display: flex; gap: 8px; align-items: center; flex-wrap: wrap; }
+.status { color: var(--navy); font-weight: 700; font-size: 15px; margin-left: 8px; }
+.howto { margin-top: 16px; }
+.howto ol { margin: 4px 0 0; padding-left: 1.4em; }
+
+/* 全部見る */
+.more { border-top: 2px solid var(--ink); margin-top: 24px; padding: 32px 0 8px; }
+.more > h2 { font-size: 22px; margin: 0 0 4px; }
+details { border-bottom: 1px solid var(--rule); }
+summary { cursor: pointer; padding: 18px 0; font-weight: 700; font-size: 17px; list-style-position: outside; }
+summary span { font-weight: 400; color: var(--muted); font-size: 14px; margin-left: 8px; }
+details[open] { padding-bottom: 24px; }
+.filter { height: 44px; width: 100%; max-width: 420px; padding: 0 12px; border: 1px solid var(--ink); margin: 0 0 12px; }
+table { border-collapse: collapse; font-size: 14px; width: 100%; }
+th, td { border-bottom: 1px solid var(--rule); padding: 8px; text-align: left; vertical-align: top; }
+thead th { font-weight: 600; border-bottom: 1px solid var(--ink); white-space: nowrap; }
+.list td.d { color: var(--muted); }
+.list td.w { text-align: right; white-space: nowrap; }
+.list .in { color: var(--navy); font-weight: 700; white-space: nowrap; }
+.scroll { overflow: auto; max-height: 70vh; }
+.full th.sk { height: 190px; vertical-align: bottom; padding: 4px 0; width: 30px; }
+.full th.sk span { writing-mode: vertical-rl; transform: rotate(180deg); white-space: nowrap; font-weight: 500; }
+.full td.c { text-align: center; padding: 4px; width: 30px; vertical-align: middle; }
+.full tbody th { position: sticky; left: 0; background: var(--paper); white-space: nowrap; font-weight: 600; z-index: 1; }
+.full .tally { font-weight: 400; color: var(--muted); margin-left: 8px; }
+.full td[data-ev] { cursor: help; }
+.s { display: inline-flex; width: 22px; height: 22px; align-items: center; justify-content: center; font-size: 14px; line-height: 1; font-weight: 700; }
+.s.r { border: 1.5px solid var(--ink); }
+.s.a { background: var(--navy); color: #fff; }
+.s.m { color: var(--muted); font-size: 18px; }
+#tip { position: fixed; z-index: 9; max-width: 420px; padding: 8px 10px; background: var(--ink); color: #fff; font-size: 14px; line-height: 1.55; pointer-events: none; display: none; }
+footer { padding: 32px 0 56px; font-size: 14px; color: var(--muted); }
+footer p { margin: 0 0 6px; max-width: none; }
+footer a { color: var(--navy); }
+
+@media (max-width: 760px) {
+  :root { --gut: 16px; }
+  .intro h1 { font-size: 28px; }
+  .steps button { font-size: 14px; padding: 0 4px; }
+  .steps .t { display: none; }
+  .step { padding-left: 16px; }
+  .ask { flex-direction: column; }
+  .role { grid-template-columns: 1fr auto; }
+  .role .lbl { grid-column: 1 / -1; }
+  .role .why { grid-column: 1 / -1; }
+}
+@media (prefers-reduced-motion: reduce) { .btn:active { transform: none; } html { scroll-behavior: auto; } }
+</style>
+</head>
+<body>
+<header class="wrap intro" id="s1">
+  <p class="brand">SKILL-CLASH</p>
+  <h1>読む skill を2つに絞り、LOADOUT.md にして Claude に渡す</h1>
+  <p>Claude に skill を一度に何個も読ませると、指示がぶつかって平均的な出力になる。</p>
+  <p>この画面に依頼を1行入れると、読む skill を「作る用1つ＋点検用1つ」に絞る。ぶつかる所を決めたら、結果を LOADOUT.md にして Claude に先に読ませる。</p>
+  <p class="example">例: 「カフェの LP を作る」と入れると、<strong id="ex-b"></strong> で作り、<strong id="ex-c"></strong> で点検する、と出る。</p>
+</header>
+
+<nav class="steps" aria-label="段階">
+  <ol id="steps">
+    <li data-s="1"><button type="button"><b>①</b><span class="t">入る</span></button></li>
+    <li data-s="2"><button type="button"><b>②</b><span class="t">依頼を書く</span></button></li>
+    <li data-s="3"><button type="button"><b>③</b><span class="t">提案を見る</span></button></li>
+    <li data-s="4"><button type="button"><b>④</b><span class="t">ぶつかる所を決める</span></button></li>
+    <li data-s="5"><button type="button"><b>⑤</b><span class="t">持ち帰る</span></button></li>
+  </ol>
+</nav>
+
+<main class="wrap">
+  <section class="step" id="s2" aria-labelledby="h2">
+    <h2 id="h2"><span class="n">②</span>何を作るかを1行で書く</h2>
+    <p class="muted">日本語でも英語でもよい。<span id="n-skills"></span>個の skill の説明（description）と語が重なるものを探す。</p>
+    <form class="ask" id="ask">
+      <label class="sr" for="task">依頼の1行</label>
+      <input id="task" type="text" autocomplete="off" placeholder="例: カフェの LP を作る">
+      <button class="btn" type="submit">候補を出す</button>
+    </form>
+    <div class="chips"><span class="muted">例を入れる:</span>
+      <button type="button" data-ex="カフェの LP を作る">カフェの LP を作る</button>
+      <button type="button" data-ex="高級感のある LP">高級感のある LP</button>
+      <button type="button" data-ex="設定画面を作る">設定画面を作る</button>
+      <button type="button" data-ex="発表スライドを作る">発表スライドを作る</button>
+    </div>
+  </section>
+
+  <section class="step" id="s3" aria-labelledby="h3" aria-live="polite"></section>
+  <section class="step" id="s4" aria-labelledby="h4"></section>
+  <section class="step" id="s5" aria-labelledby="h5"></section>
+
+  <section class="more" id="more" aria-labelledby="more-h">
+    <h2 id="more-h">全部見る</h2>
+    <p class="muted">提案に納得できないときに開く。一覧から候補に足すと、③に戻って選び直せる。</p>
+    <details id="d-list"><summary>skill を全部見る<span id="sum-list"></span></summary>
+      <label class="sr" for="q">名前と説明で絞り込む</label>
+      <input class="filter" id="q" type="search" placeholder="名前か説明の語で絞り込む" autocomplete="off">
+      <div class="scroll"><table class="list"><thead><tr><th>skill</th><th>種類</th><th>語数</th><th>説明</th><th><span class="sr">操作</span></th></tr></thead><tbody id="list"></tbody></table></div>
+    </details>
+    <details><summary>軸ごとの立場の対照表を見る<span id="sum-full"></span></summary>
+      <p class="muted small">✓ 勧める　✗ 避ける　~ 両方を言う。印にマウスを乗せるか、Tab で移ると根拠の文が出る。</p>
+      <div class="scroll"><table class="full" id="full"></table></div>
+    </details>
+    <details><summary>説明が似ている skill の対を見る<span id="sum-ov"></span></summary>
+      <p class="muted small">説明の語の重なり（Jaccard 0.25 以上）。同じ依頼で両方が呼ばれやすい。</p>
+      <table><thead><tr><th>skill</th><th>skill</th><th>重なり</th><th>共通の語</th></tr></thead><tbody id="pairs"></tbody></table>
+    </details>
+  </section>
+
+  <footer>
+    <p>IFScale: 同時に守らせる指示が増えるほど、最上位のモデルでも守られる割合が下がる。<a href="https://arxiv.org/abs/2507.11538">arXiv:2507.11538</a></p>
+    <p>ConInstruct: モデルは指示のぶつかりに気づいても、ほとんど口に出さず、黙って片方に従う。<a href="https://arxiv.org/abs/2511.14342">arXiv:2511.14342</a></p>
+    <p>候補は説明の語の重なりで、立場は SKILL.md の文の手がかりで推定している。根拠の行を原文で確かめてから決める。</p>
+  </footer>
+</main>
+<div id="tip" role="tooltip"></div>
+
+<script type="application/json" id="data">/*DATA*/null</script>
+<script>
+"use strict";
+const D = JSON.parse(document.getElementById("data").textContent);
+const LIMIT = D.budget_limit;
+const BY = Object.fromEntries(D.skills.map(s => [s.name, s]));
+const SYM = { recommends: ["r", "✓", "勧める"], avoids: ["a", "✗", "避ける"], mixed: ["m", "~", "両方を言う"] };
+const KIND = { builder: "作る", checker: "点検", other: "その他" };
+const AXIS_JA = { "gradient": "グラデーション", "serif": "セリフ体・明朝の見出し", "card grid / bento": "カードの並び・ベントー",
+  "dark theme": "暗い背景", "emoji": "絵文字", "border radius / rounded": "角丸", "glassmorphism": "すりガラス",
+  "centered hero": "中央寄せの冒頭", "letter-spacing / tracking": "字間", "system-ui": "system-ui の書体",
+  "Inter / Space Grotesk": "Inter・Space Grotesk の書体", "purple / violet": "紫", "cream / beige background": "クリーム地",
+  "drop shadow": "影", "scroll reveal": "スクロールで出てくる動き", "hover tilt": "ホバーで傾く動き" };
+const EXAMPLE = "カフェの LP を作る";
+const fmt = n => n.toLocaleString("en-US");
+const esc = s => String(s ?? "").replace(/[&<>"']/g, c => ({ "&": "&amp;", "<": "&lt;", ">": "&gt;", '"': "&quot;", "'": "&#39;" }[c]));
+const $ = id => document.getElementById(id);
+const st = (n, axis) => D.stance[n]?.[axis] || { stance: null };
+const plain = t => String(t ?? "").replace(/\*\*|__|`/g, "").replace(/^[-*+]\s+/, "");
+const sym = s => s ? `<span class="s ${SYM[s][0]}" aria-label="${SYM[s][2]}">${SYM[s][1]}</span>` : "";
+
+// ---------- matching: the same idea as skill_clash.py tokens()/plan() ----------
+const CJK = /[぀-ヿ㐀-鿿ｦ-ﾟ]/g, CJK_RUN = /[぀-ヿ㐀-鿿ｦ-ﾟ]+/g;
+const STOP = new Set(`a an and or the of to in on for with by from as at is are be this that these those it its
+into your you their our any all when use used uses using user users skill skills mentions mention trigger
+also not but than then such via like can will should must what which who how about over under each
+covers cover see other more most very just only own make makes etc e.g i.e asks ask want wants`.split(/\s+/));
+const REVIEW_HINT = /review|audit|critique|check|evaluat|inspect|lint|detect|点検|見直|レビュー|監査/i;
+const BUILD_HINT = /build|create|generat|make|craft|author|implement|作る|作成/i;
+function tokens(text) {
+  const out = new Set();
+  for (const m of text.toLowerCase().replace(CJK, " ").matchAll(/[a-z][a-z0-9-]+/g)) {
+    let w = m[0].replace(/^-+|-+$/g, "");
+    if (w.length < 3 || STOP.has(w)) continue;
+    if (w.length > 4 && w.endsWith("s") && !w.endsWith("ss")) w = w.slice(0, -1);
+    out.add(w);
+  }
+  for (const run of text.match(CJK_RUN) || []) for (let i = 0; i < run.length - 1; i++) out.add(run.slice(i, i + 2));
+  return out;
+}
+// shortcut: a small hand list maps Japanese request words to the English words most descriptions use; grow it when a common request finds nothing
+const ALIAS = (/*ALIAS*/null || []).map(([rx, en]) => [new RegExp(rx, "i"), en]);  // lexicon.json "ja_en", shared with skill_clash.py
+const HIRA2 = /^[぀-ゟ]/;  // bigrams that open with a particle (「のあ」「を作」) match everything; drop them
+function taskTokens(task) {
+  const extra = ALIAS.filter(([rx]) => rx.test(task)).map(([, en]) => en).join(" ");
+  return new Set([...tokens(task + " " + extra)].filter(w => !HIRA2.test(w)));
+}
+const DTOK = Object.fromEntries(D.skills.map(s => [s.name, new Set([...tokens(s.description), ...tokens(s.name.replace(/-/g, " "))])]));
+const isChecker = n => BY[n].kind === "checker";
+const clashing = names => D.axes.filter(a => { const v = new Set(names.map(n => st(n, a).stance)); return v.has("recommends") && v.has("avoids"); });
+
+// same rule as skill_clash.py plan(): score = matched / task words, ties to fewer words; best pair has the fewest clashes
+function plan(task, k = 3) {
+  const t = taskTokens(task);
+  if (!t.size) return { build: [], review: [], b: null, c: null, hit: {} };
+  const scored = [], hit = {};
+  for (const s of D.skills) {
+    const h = [...t].filter(w => DTOK[s.name].has(w));
+    if (h.length) { scored.push([h.length / t.size, s.name]); hit[s.name] = h; }
+  }
+  scored.sort((x, y) => y[0] - x[0] || BY[x[1]].words - BY[y[1]].words);
+  const build = scored.filter(x => !isChecker(x[1])).slice(0, k), review = scored.filter(x => isChecker(x[1])).slice(0, k);
+  let best = null;
+  for (const [bs, b] of build) for (const [rs, r] of review) {
+    const score = bs + rs - 0.1 * clashing([b, r]).length - (BY[b].words + BY[r].words > LIMIT ? 0.2 : 0);
+    if (!best || score > best[0]) best = [score, b, r];
+  }
+  if (!best && build.length) best = [0, build[0][1], null];
+  return { build: build.map(x => x[1]), review: review.map(x => x[1]), b: best?.[1] || null, c: best?.[2] || null, hit };
+}
+
+// same text as skill_clash.py loadout_md(); keep them in step
+function loadoutMd(names, builder, checker, wins) {
+  const rest = names.filter(n => n !== builder && n !== checker);
+  const out = ["# LOADOUT（skill より先に読む）", `作る用: ${builder}（この1つだけの手順で作る）`,
+    checker ? `点検用: ${checker}（仕上げの点検にだけ使う）` : "点検用: なし（set に点検用の skill がない）",
+    `読まない: ${rest.join("、") || "なし"}（必要な軸を直すときだけ読む）`, "決めた向き（ぶつかる軸）:"];
+  const cl = clashing(names);
+  for (const axis of cl) {
+    const row = names.filter(n => st(n, axis).stance);
+    const ref = n => `${n} L${st(n, axis).line}`;
+    const w = wins[axis];
+    if (w) {
+      const s = st(w, axis).stance, opp = s === "recommends" ? "avoids" : "recommends";
+      const losers = row.filter(n => st(n, axis).stance === opp).map(n => `${ref(n)} の${opp === "recommends" ? "勧め" : "禁止"}`).join("、");
+      out.push(`- ${axis}: ${s === "recommends" ? "使う" : "使わない"}（${w} に従う。${losers}は今回は採らない）`);
+    } else {
+      const rec = row.filter(n => st(n, axis).stance === "recommends").map(ref).join("、");
+      const avo = row.filter(n => st(n, axis).stance === "avoids").map(ref).join("、");
+      out.push(`- ${axis}: 未決（${rec} は勧める。${avo} は避ける。人が決める）`);
+    }
+  }
+  if (!cl.length) out.push("- なし");
+  const read = BY[builder].words + (checker ? BY[checker].words : 0), total = names.reduce((t, n) => t + BY[n].words, 0);
+  out.push(`読む語数: ${fmt(read)} 語（作る用＋点検用。上限 ${fmt(LIMIT)}）` + (read > LIMIT ? `。上限を ${fmt(read - LIMIT)} 語超える` : ""));
+  if (rest.length) out.push(`候補を全部読むと: ${fmt(total)} 語`);
+  return out.join("\n") + "\n";
+}
+
+// ---------- state, kept in the URL hash: #task=..&b=..&c=..&add=a,b&win=axis:skill;.. ----------
+const S = { task: "", b: "", c: "", add: [], win: {} };
+function readHash() {
+  const p = new URLSearchParams(location.hash.slice(1));
+  S.task = p.get("task") || "";
+  S.b = BY[p.get("b")] ? p.get("b") : "";
+  S.c = p.get("c") === "-" || BY[p.get("c")] ? p.get("c") : "";
+  S.add = (p.get("add") || "").split(",").filter(n => BY[n]);
+  S.win = {};
+  for (const kv of (p.get("win") || "").split(";").filter(Boolean)) {
+    const i = kv.lastIndexOf(":"), a = kv.slice(0, i), n = kv.slice(i + 1);
+    if (D.axes.includes(a) && (BY[n] || n === "-")) S.win[a] = n;
+  }
+}
+function writeHash() {
+  const p = new URLSearchParams();
+  if (S.task) p.set("task", S.task);
+  if (S.b) p.set("b", S.b);
+  if (S.c) p.set("c", S.c);
+  if (S.add.length) p.set("add", S.add.join(","));
+  const w = Object.entries(S.win).map(([a, n]) => `${a}:${n}`).join(";");
+  if (w) p.set("win", w);
+  history.replaceState(null, "", p.toString() ? "#" + p.toString() : location.pathname + location.search);
+}
+
+// the current loadout: candidates = proposal + other hits + skills added by hand
+function model() {
+  const sample = !S.task.trim();
+  const task = sample ? EXAMPLE : S.task.trim();
+  const p = plan(task);
+  const set = [...new Set([...(p.b ? [p.b] : []), ...(p.c ? [p.c] : []), ...p.build, ...p.review, ...(sample ? [] : S.add)])];
+  let b = !sample && set.includes(S.b) ? S.b : p.b;
+  if (!b && set.length) b = set.find(n => !isChecker(n)) || set[0];
+  let c = sample ? p.c : S.c === "-" ? null : set.includes(S.c) && S.c !== b ? S.c : p.c !== b ? p.c : null;
+  if (!sample && !c && S.c !== "-") c = set.find(n => isChecker(n) && n !== b) || null;
+  const cl = clashing(set);
+  const picked = sample ? {} : Object.fromEntries(Object.entries(S.win).filter(([a, n]) => cl.includes(a) && (n === "-" || set.includes(n))));
+  const win = Object.fromEntries(Object.entries(picked).filter(([, n]) => n !== "-"));  // "-" = decided to leave it open
+  return { sample, task, p, set, b, c, cl, win, picked, open: cl.filter(a => !picked[a]), later: cl.filter(a => picked[a] === "-") };
+}
+
+// ---------- rendering ----------
+const quoteHits = h => h.slice(0, 4).map(w => `<q>${esc(w)}</q>`).join("");
+function reason(n, m) {
+  const h = m.p.hit[n];
+  const where = h ? `説明に${quoteHits(h)}があり、依頼に合う` : "依頼の語とは重ならないが、手で候補に足した";
+  return `${where}。${isChecker(n) ? "作ったものを見直すための skill" : "作るための skill"}。`;
+}
+// skill_clash.py apply reads this: set=..&b=..&c=..|-&win=axis:skill;axis:-
+function applyCmd(m) {
+  const p = new URLSearchParams({ set: m.set.join(","), b: m.b, c: m.c || "-" });
+  const w = Object.entries(m.picked).map(([a, n]) => `${a}:${n}`).join(";");
+  if (w) p.set("win", w);
+  return `python3 ~/.claude/skills/skill-clash/scripts/skill_clash.py apply '#${p.toString().replace(/'/g, "%27")}'`;
+}
+function current(m) { return m.sample ? 2 : !m.set.length ? 3 : m.open.length ? 4 : 5; }
+function mark(m) {
+  const cur = current(m);
+  for (const li of $("steps").children) {
+    const s = +li.dataset.s;
+    li.classList.toggle("done", s < cur);
+    if (s === cur) li.setAttribute("aria-current", "step"); else li.removeAttribute("aria-current");
+  }
+  for (const s of [2, 3, 4, 5]) {
+    const el = $("s" + s); el.classList.toggle("now", s === cur);
+    el.querySelector(".now-tag")?.remove();
+    if (s === cur) el.insertAdjacentHTML("afterbegin", `<span class="now-tag">いまここ</span>`);
+  }
+}
+function render() {
+  const m = model();
+  const tag = m.sample ? `<span class="sample">例: 「${esc(EXAMPLE)}」の場合。②に依頼を入れると置き換わる</span>` : "";
+  // ③
+  let h;
+  if (!m.set.length) {
+    h = `<h2 id="h3"><span class="n">③</span>合う skill が見つからない</h2>
+      <p>見つからない。下の「全部見る」の一覧から選んで、候補に足す。</p>
+      <p><button class="btn sub sm" type="button" data-open-list>skill の一覧を開く</button></p>`;
+  } else {
+    const both = BY[m.b].words + (m.c ? BY[m.c].words : 0);
+    const all = m.set.reduce((t, n) => t + BY[n].words, 0);
+    h = tag + (m.c
+      ? `<h2 id="h3"><span class="n">③</span>${esc(m.b)} で作り、${esc(m.c)} で点検する。合わせて <span class="num">${fmt(both)}</span> 語</h2>`
+      : `<h2 id="h3"><span class="n">③</span>${esc(m.b)} だけで作ってよい。<span class="num">${fmt(both)}</span> 語</h2>`);
+    h += `<p class="muted">読むのはこの${m.c ? "2つ" : "1つ"}だけにする。作る用は作るときに読み、点検用は作り終えてから読む。語数は SKILL.md の語の数（英語は単語、日本語は2字で1語）。合わせて ${fmt(LIMIT)} 語を超えると、Claude が指示を守りにくくなる。</p>`;
+    const roleRow = (lbl, n) => `<div class="role"><span class="lbl">${lbl}</span><span class="nm">${esc(n)}</span><span class="wd num">${fmt(BY[n].words)} 語</span><p class="why">理由: ${reason(n, m)}</p></div>`;
+    h += roleRow("作る用", m.b) + (m.c ? roleRow("点検用", m.c) : `<div class="role"><span class="lbl">点検用</span><span class="nm muted">なし</span><span></span><p class="why">候補に点検用の skill がない。下の候補か「全部見る」から足せる。</p></div>`);
+    if (m.set.length > 2 || (m.set.length > 1 && !m.c)) {
+      h += `<p class="total">当たった候補を全部読むと <strong class="num">${m.set.length}</strong>個で <strong class="num">${fmt(all)}</strong> 語。${all > LIMIT ? `上限 ${fmt(LIMIT)} 語を <strong class="num">${fmt(all - LIMIT)}</strong> 語超える。` : `上限 ${fmt(LIMIT)} 語の内に収まる。`}絞れば <strong class="num">${fmt(both)}</strong> 語で済む。</p>
+        <h3>ほかに当たった候補（読まない）</h3><p class="muted small">提案より合うものがあれば、役を替える。</p><ul class="others">` +
+        m.set.filter(n => n !== m.b && n !== m.c).map(n => `<li><span class="nm">${esc(n)} <span class="muted small">${KIND[BY[n].kind]}</span></span><span class="num">${fmt(BY[n].words)} 語</span>
+          <span class="acts">${isChecker(n) ? "" : `<button class="btn sub sm" type="button" data-b="${esc(n)}">作る用にする</button>`}<button class="btn sub sm" type="button" data-c="${esc(n)}">点検用にする</button>${S.add.includes(n) ? `<button class="btn sub sm" type="button" data-rm="${esc(n)}">候補から外す</button>` : ""}</span>
+          <span class="why">${reason(n, m)}</span></li>`).join("") + `</ul>`;
+    }
+  }
+  $("s3").innerHTML = h;
+  // ④
+  if (!m.set.length) h = `<h2 id="h4"><span class="n">④</span>候補がないので、ぶつかる所もない</h2>`;
+  else if (!m.cl.length) h = tag + `<h2 id="h4"><span class="n">④</span>ぶつかる所はない。そのまま⑤へ進む</h2><p class="muted">候補の skill どうしで、勧める・避けるが逆になる所が見つからなかった。</p>`;
+  else if (m.sample) h = tag + `<h2 id="h4"><span class="n">④</span>この例では <span class="num">${m.cl.length}</span>つの所で、候補どうしの言うことが逆になる</h2>
+    <p>${m.cl.map(a => esc(AXIS_JA[a] || a)).join("、")}。</p><p class="muted">②に依頼を入れると、ここで1つずつ「使う」「使わない」「あとで決める」を選べる。</p>`;
+  else {
+    h = tag + `<h2 id="h4"><span class="n">④</span>${m.open.length ? `<span class="num">${m.cl.length}</span>つの所で、候補どうしの言うことが逆になる。残り <span class="num">${m.open.length}</span>つを決める` : `ぶつかる <span class="num">${m.cl.length}</span>つの所は、すべて決めた`}</h2>
+      <p class="muted">読まない候補も、あとで1つの軸を直すときに読むことがある。そのときの向きをここで先に決め、LOADOUT.md に書く。印の「読む」は③で選んだ2つ。根拠の文を読み、本当に逆かを確かめてから選ぶ。迷う所は「あとで決める」でよい。</p>
+      ${m.open.length > 1 ? `<p><button class="btn sub sm" type="button" id="later-all">残り${m.open.length}つをまとめて「あとで決める」にする</button></p>` : ""}`;
+    h += m.cl.map(a => {
+      const side = s => m.set.filter(n => st(n, a).stance === s);
+      const opt = (s, say) => { const ns = side(s); return `<label class="opt"><input type="radio" name="w-${esc(a)}" data-a="${esc(a)}" value="${esc(ns[0])}"${m.win[a] && st(m.win[a], a).stance === s ? " checked" : ""}>
+        <span class="say">${say}</span><span class="ev">${ns.map(n => `<b>${esc(n)}</b>${n === m.b || n === m.c ? `<span class="rd">読む</span>` : ""} ${st(n, a).line} 行目:「${esc(plain(st(n, a).evidence))}」`).join("<br>")}</span></label>`; };
+      return `<fieldset class="axis"><legend>${esc(AXIS_JA[a] || a)}<span class="en">${esc(a)}</span></legend>
+        ${opt("recommends", "使う")}${opt("avoids", "使わない")}
+        <label class="opt"><input type="radio" name="w-${esc(a)}" data-a="${esc(a)}" value="-"${m.picked[a] === "-" ? " checked" : ""}><span class="say">あとで決める</span><span class="ev">LOADOUT.md に「未決（人が決める）」と書く。Claude はその点を作る前にあなたに確かめる。</span></label></fieldset>`;
+    }).join("");
+  }
+  $("s4").innerHTML = h;
+  // ⑤
+  const md = m.set.length ? loadoutMd(m.set, m.b, m.c, m.win) : "";
+  h = m.sample ? tag + `<h2 id="h5"><span class="n">⑤</span>これが例の LOADOUT.md。依頼を入れると作り直す</h2>`
+    : !m.set.length ? `<h2 id="h5"><span class="n">⑤</span>候補を選ぶと、ここに LOADOUT.md が出る</h2>`
+    : `<h2 id="h5"><span class="n">⑤</span>LOADOUT.md ができた${m.open.length + m.later.length ? `。未決が <span class="num">${m.open.length + m.later.length}</span>つある` : ""}</h2>`;
+  if (m.sample && m.set.length) h += `<textarea readonly aria-label="例の LOADOUT.md" style="opacity:.6">${esc(md)}</textarea>
+    <p><strong>②に依頼を入れると、ここに自分用の LOADOUT.md が出て、コピーと保存ができる。</strong></p>
+    <p><button class="btn" type="button" data-go="s2">②で依頼を書く</button></p>`;
+  else if (m.set.length) h += `<label class="sr" for="md">LOADOUT.md の中身</label><textarea id="md" readonly>${esc(md)}</textarea>
+    <div class="row-btns"><button class="btn" type="button" id="copy">LOADOUT.md をコピーする</button><button class="btn sub" type="button" id="save">ファイルで保存する</button><span class="status" id="status" role="status"></span></div>
+    <h3>コマンドで持ち帰る</h3><p class="muted">端末で作業フォルダに移ってから貼って回すか、Claude に貼って「これを回して」と頼む。作業フォルダに同じ LOADOUT.md ができる。毎回の会話で自動で読ませたいときは、末尾に <code>--rules</code> を付ける。</p>
+    <label class="sr" for="cmd">apply のコマンド</label><textarea id="cmd" readonly style="min-height:0;height:auto" rows="4">${esc(applyCmd(m))}</textarea>
+    <div class="row-btns"><button class="btn sub" type="button" id="copy-cmd">コマンドをコピーする</button></div>
+    <div class="howto"><p><strong>使い方</strong></p><ol><li>作業フォルダに LOADOUT.md を置く（上のコマンドなら自動で置かれる）。</li><li>Claude に「LOADOUT.md を先に読んでから作って」と頼む。</li><li>この画面の URL には選んだ状態が残る。あとで開き直せる。</li></ol></div>`;
+  $("s5").innerHTML = h;
+  mark(m);
+  renderList();
+}
+
+// ---------- events ----------
+const setTask = v => { S.task = v; writeHash(); render(); };  // choices that no longer fit the new candidates are ignored in model()
+$("ask").addEventListener("submit", e => { e.preventDefault(); setTask($("task").value); $("s3").scrollIntoView({ behavior: "smooth" }); });
+$("task").addEventListener("input", e => setTask(e.target.value));
+document.querySelector(".chips").addEventListener("click", e => {
+  const v = e.target.dataset.ex; if (!v) return;
+  $("task").value = v; setTask(v); $("task").focus();
+});
+$("steps").addEventListener("click", e => {
+  const li = e.target.closest("li"); if (!li) return;
+  $("s" + li.dataset.s).scrollIntoView({ behavior: "smooth", block: "start" });
+});
+$("s3").addEventListener("click", e => {
+  const d = e.target.dataset;
+  if (d.b) { S.b = d.b; if (S.c === d.b) S.c = ""; }
+  else if (d.c) { S.c = d.c; if (S.b === d.c) S.b = ""; }
+  else if (d.rm) S.add = S.add.filter(n => n !== d.rm);
+  else if ("openList" in d) { $("d-list").open = true; $("d-list").scrollIntoView({ behavior: "smooth" }); return; }
+  else return;
+  writeHash(); render();
+});
+$("s4").addEventListener("click", e => {
+  if (e.target.id !== "later-all") return;
+  for (const a of model().open) S.win[a] = "-";
+  writeHash(); render(); $("s5").scrollIntoView({ behavior: "smooth" });
+});
+$("s4").addEventListener("change", e => {
+  const t = e.target; if (!t.dataset.a) return;
+  S.win[t.dataset.a] = t.value;
+  writeHash(); render();
+});
+$("s5").addEventListener("click", async e => {
+  if (e.target.dataset.go) { $("task").focus(); $("s2").scrollIntoView({ behavior: "smooth" }); return; }
+  if (!["copy", "save", "copy-cmd"].includes(e.target.id)) return;
+  const md = e.target.id === "copy-cmd" ? $("cmd").value : $("md").value;
+  if (e.target.id === "save") {
+    const a = document.createElement("a");
+    a.href = URL.createObjectURL(new Blob([md], { type: "text/markdown" })); a.download = "LOADOUT.md"; a.click();
+    setTimeout(() => URL.revokeObjectURL(a.href), 1000);
+    $("status").textContent = "LOADOUT.md の保存を始めた";
+    return;
+  }
+  let ok = false;
+  try { await navigator.clipboard.writeText(md); ok = true; } catch { $("md").select(); ok = document.execCommand?.("copy"); }
+  $("status").textContent = !ok ? "コピーできなかった。欄を選んで手でコピーする" : e.target.id === "copy-cmd" ? "コマンドをコピーした。Claude に貼るか端末で回す" : "LOADOUT.md をコピーした。作業フォルダに保存するか Claude に貼る";
+});
+
+// ---------- 全部見る ----------
+function renderList() {
+  const q = $("q").value.trim().toLowerCase(), m = model();
+  const rows = D.skills.filter(s => !q || s.name.toLowerCase().includes(q) || s.description.toLowerCase().includes(q)).sort((a, b) => b.words - a.words);
+  $("list").innerHTML = rows.map(s => `<tr><td><strong>${esc(s.name)}</strong></td><td>${KIND[s.kind]}</td><td class="w num">${fmt(s.words)} 語</td>
+    <td class="d">${esc(s.description.slice(0, 160))}${s.description.length > 160 ? "…" : ""}</td>
+    <td>${m.set.includes(s.name) ? `<span class="in">候補にある</span>` : `<button class="btn sub sm" type="button" data-add="${esc(s.name)}"${m.sample ? " disabled title=\"先に②で依頼を入れる\"" : ""}>候補に足す</button>`}</td></tr>`).join("")
+    || `<tr><td colspan="5">合う skill がない。語を短くして探す。</td></tr>`;
+}
+$("q").addEventListener("input", renderList);
+$("list").addEventListener("click", e => {
+  const n = e.target.dataset.add; if (!n) return;
+  S.add = [...S.add, n]; writeHash(); render(); $("s3").scrollIntoView({ behavior: "smooth" });
+});
+
+$("pairs").innerHTML = D.overlap.map(o => `<tr><td>${esc(o.a)}</td><td>${esc(o.b)}</td><td class="num">${o.jaccard.toFixed(2)}</td><td class="muted">${esc(o.shared.slice(0, 10).join(", "))}</td></tr>`).join("")
+  || `<tr><td colspan="4">重なりが 0.25 以上の対はない。</td></tr>`;
+$("sum-ov").textContent = `${D.overlap.length}組`;
+$("sum-list").textContent = `${D.skills.length}個、合わせて ${fmt(D.skills.reduce((t, s) => t + s.words, 0))} 語`;
+$("n-skills").textContent = D.skills.length;
+
+(function full() {
+  const cols = D.skills.map(s => s.name).filter(n => D.axes.some(a => st(n, a).stance));
+  const rows = D.axes.filter(a => cols.some(n => st(n, a).stance));
+  const allClash = clashing(D.skills.map(s => s.name));
+  $("sum-full").textContent = `${cols.length}個の skill、${allClash.length}つの軸で ✓ と ✗ が並ぶ`;
+  const tally = a => { const v = cols.map(n => st(n, a).stance); return `✓${v.filter(x => x === "recommends").length} ✗${v.filter(x => x === "avoids").length}`; };
+  $("full").innerHTML = `<thead><tr><th>軸</th>${cols.map(n => `<th class="sk"><span>${esc(n)}</span></th>`).join("")}</tr></thead><tbody>
+    ${rows.map(a => `<tr><th scope="row" style="${allClash.includes(a) ? "box-shadow: inset 3px 0 0 var(--navy)" : ""}">${esc(AXIS_JA[a] || a)}<span class="tally num">${tally(a)}</span></th>
+      ${cols.map(n => { const x = st(n, a); return x.stance ? `<td class="c" tabindex="0" data-ev="${esc(`${n} ${x.line} 行目: ${x.evidence}`)}">${sym(x.stance)}</td>` : `<td class="c"></td>`; }).join("")}</tr>`).join("")}</tbody>`;
+  const tip = $("tip");
+  const show = e => {
+    const td = e.target.closest("td[data-ev]"); if (!td) { tip.style.display = "none"; return; }
+    tip.textContent = td.dataset.ev; tip.style.display = "block";
+    const r = td.getBoundingClientRect();
+    tip.style.left = Math.max(8, Math.min(r.left, innerWidth - tip.offsetWidth - 12)) + "px";
+    tip.style.top = (r.bottom + 6 + tip.offsetHeight > innerHeight ? r.top - tip.offsetHeight - 6 : r.bottom + 6) + "px";
+  };
+  $("full").addEventListener("mouseover", show); $("full").addEventListener("focusin", show);
+  $("full").addEventListener("mouseleave", () => tip.style.display = "none");
+  $("full").addEventListener("focusout", () => tip.style.display = "none");
+})();
+
+{ const p = plan(EXAMPLE); $("ex-b").textContent = p.b || "（該当なし）"; $("ex-c").textContent = p.c || "（該当なし）"; }
+readHash(); $("task").value = S.task; render();
+addEventListener("hashchange", () => { readHash(); $("task").value = S.task; render(); });
+</script>
+</body>
+</html>

@@ -1,0 +1,17 @@
+name: check
+on:
+  push:
+  pull_request:
+jobs:
+  selftest:
+    strategy:
+      matrix:
+        os: [ubuntu-latest, macos-latest]
+    runs-on: ${{ matrix.os }}
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-python@v5
+        with:
+          python-version: "3.x"
+      - run: python3 skills/skill-clash/scripts/skill_clash.py selftest
+      - run: python3 skills/skill-clash/scripts/skill_clash.py --help
